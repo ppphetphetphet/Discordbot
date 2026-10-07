@@ -7,8 +7,7 @@ from server import server_on
 
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
 
-# ID ของห้องที่ต้องการส่งข้อความแจ้งเตือนเข้า-ออก (นำ ID มาใส่ตรงนี้)
-WELCOME_CHANNEL_ID = YOUR_CHANNEL_ID_HERE  # เช่น 1140633489520205934
+
 
 
 # //////////////////// Bot Event /////////////////////////
@@ -28,14 +27,6 @@ async def on_member_join(member):
         text = f"Welcome to the server, {member.mention}!"
         await channel.send(text)
     await member.send(f"Welcome to the server, {member.mention}!")
-
-
-@bot.event
-async def on_member_remove(member):
-    channel = bot.get_channel(963602209365450806)
-    if channel:
-        text = f"{member.name} has left the server!"
-        await channel.send(text)
 
 
 # คำสั่ง chatbot
