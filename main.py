@@ -2,10 +2,6 @@ import os
 import discord
 from discord.ext import commands
 from discord import app_commands
-from dotenv import load_dotenv
-
-# โหลดค่า Token จากไฟล์ .env
-load_dotenv()
 
 # ตั้งค่าบอทและเปิด Intents ทั้งหมด
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
