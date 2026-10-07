@@ -128,6 +128,10 @@ async def helpcommand(interaction: discord.Interaction):
     await interaction.response.send_message(text)
 
 
-server_on()
+import threading
 
+# รัน Flask web server ใน Background Thread เพื่อไม่ให้บล็อกบอท
+threading.Thread(target=server_on).start()
+
+# รันบอท Discord
 bot.run(os.getenv('TOKEN'))
