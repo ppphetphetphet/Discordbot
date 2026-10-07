@@ -5,26 +5,33 @@ from discord import app_commands
 
 from server import server_on
 
-# 1. เปิดเว็บเซิร์ฟเวอร์เบื้องหลัง
+# 1. รันเว็บ Flask ใน Background
 server_on()
 
 # 2. ตั้งค่าบอท
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
 
-# ID ของห้องที่ต้องการส่งข้อความแจ้งเตือนเข้า-ออก (ใส่ ID ห้องของคุณ)
+# ID ของห้องแจ้งเตือน (เปลี่ยนเป็น ID จริงของคุณ)
 WELCOME_CHANNEL_ID = 1140633489520205934
 
 
 # //////////////////// Bot Event /////////////////////////
 @bot.event
 async def on_ready():
-    print("Bot Online!")
-    print("555")
-    synced = await bot.tree.sync()
-    print(f"{len(synced)} command(s)")
+    print("---------------------------------")
+    print(f"Logged in as: {bot.user.name}")
+    print("Bot Online Completely!")
+    print("---------------------------------")
+    
+    # Sync Slash Commands เข้า Discord
+    try:
+        synced = await bot.tree.sync()
+        print(f"Synced {len(synced)} command(s)")
+    except Exception as e:
+        print(f"Failed to sync commands: {e}")
 
 
-# แจ้งคนเข้า -ออกเซิฟเวอร์
+# แจ้งคนเข้า - ออกเซิฟเวอร์
 @bot.event
 async def on_member_join(member):
     channel = bot.get_channel(WELCOME_CHANNEL_ID)
@@ -106,7 +113,6 @@ async def namecommand(interaction: discord.Interaction, name: str):
     await interaction.response.send_message(f"Hello {name}")
 
 
-# Slash Commands สำหรับเข้า/ออกจากห้องเสียง
 @bot.tree.command(name='join', description='ให้บอทเข้ามาในห้องเสียงที่คุณอยู่')
 async def slash_join(interaction: discord.Interaction):
     if interaction.user.voice:
@@ -129,7 +135,6 @@ async def slash_leave(interaction: discord.Interaction):
         await interaction.response.send_message("บอทไม่ได้อยู่ในห้องเสียงครับ!", ephemeral=True)
 
 
-# คำสั่ง Help (ส่งเป็นข้อความธรรมดา ลบ Embed ออกแล้ว)
 @bot.tree.command(name='help', description='Bot Commands')
 async def helpcommand(interaction: discord.Interaction):
     text = (
@@ -141,5 +146,5 @@ async def helpcommand(interaction: discord.Interaction):
     await interaction.response.send_message(text)
 
 
-# 3. รันบอท (ต้องไว้ท้ายสุดเสมอ)
+# 3. รันบอท Discord (ต้องอยู่บรรทัดสุดท้าย)
 bot.run(os.getenv('TOKEN'))
