@@ -5,9 +5,14 @@ from discord import app_commands
 
 from server import server_on
 
+# 1. เปิดเว็บเซิร์ฟเวอร์เบื้องหลัง
+server_on()
+
+# 2. ตั้งค่าบอท
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
 
-
+# ID ของห้องที่ต้องการส่งข้อความแจ้งเตือนเข้า-ออก (ใส่ ID ห้องของคุณ)
+WELCOME_CHANNEL_ID = 1140633489520205934
 
 
 # //////////////////// Bot Event /////////////////////////
@@ -22,11 +27,19 @@ async def on_ready():
 # แจ้งคนเข้า -ออกเซิฟเวอร์
 @bot.event
 async def on_member_join(member):
-    channel = bot.get_channel(963602209365450806)
+    channel = bot.get_channel(WELCOME_CHANNEL_ID)
     if channel:
         text = f"Welcome to the server, {member.mention}!"
         await channel.send(text)
     await member.send(f"Welcome to the server, {member.mention}!")
+
+
+@bot.event
+async def on_member_remove(member):
+    channel = bot.get_channel(WELCOME_CHANNEL_ID)
+    if channel:
+        text = f"{member.name} has left the server!"
+        await channel.send(text)
 
 
 # คำสั่ง chatbot
@@ -116,7 +129,7 @@ async def slash_leave(interaction: discord.Interaction):
         await interaction.response.send_message("บอทไม่ได้อยู่ในห้องเสียงครับ!", ephemeral=True)
 
 
-# คำสั่ง Help (ส่งเป็นข้อความธรรมดาแทน Embed)
+# คำสั่ง Help (ส่งเป็นข้อความธรรมดา ลบ Embed ออกแล้ว)
 @bot.tree.command(name='help', description='Bot Commands')
 async def helpcommand(interaction: discord.Interaction):
     text = (
@@ -128,10 +141,5 @@ async def helpcommand(interaction: discord.Interaction):
     await interaction.response.send_message(text)
 
 
-import threading
-
-# รัน Flask web server ใน Background Thread เพื่อไม่ให้บล็อกบอท
-threading.Thread(target=server_on).start()
-
-# รันบอท Discord
+# 3. รันบอท (ต้องไว้ท้ายสุดเสมอ)
 bot.run(os.getenv('TOKEN'))
