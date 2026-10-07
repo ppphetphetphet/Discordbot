@@ -2,20 +2,19 @@ import os
 import discord
 from discord.ext import commands
 from discord import app_commands
+from dotenv import load_dotenv
 
-from server import server_on
+# โหลดค่า Token จากไฟล์ .env
+load_dotenv()
 
-# 1. รันเว็บ Flask ใน Background
-server_on()
-
-# 2. ตั้งค่าบอท
+# ตั้งค่าบอทและเปิด Intents ทั้งหมด
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
 
-# ID ของห้องแจ้งเตือน (เปลี่ยนเป็น ID จริงของคุณ)
+# ID ของห้องแจ้งเตือนคนเข้า-ออก (ใส่ ID จริงของคุณ)
 WELCOME_CHANNEL_ID = 1140633489520205934
 
 
-# //////////////////// Bot Event /////////////////////////
+# //////////////////// Events /////////////////////////
 @bot.event
 async def on_ready():
     print("---------------------------------")
@@ -23,7 +22,7 @@ async def on_ready():
     print("Bot Online Completely!")
     print("---------------------------------")
     
-    # Sync Slash Commands เข้า Discord
+    # ซิงก์คำสั่ง Slash
     try:
         synced = await bot.tree.sync()
         print(f"Synced {len(synced)} command(s)")
@@ -31,14 +30,12 @@ async def on_ready():
         print(f"Failed to sync commands: {e}")
 
 
-# แจ้งคนเข้า - ออกเซิฟเวอร์
 @bot.event
 async def on_member_join(member):
     channel = bot.get_channel(WELCOME_CHANNEL_ID)
     if channel:
         text = f"Welcome to the server, {member.mention}!"
         await channel.send(text)
-    await member.send(f"Welcome to the server, {member.mention}!")
 
 
 @bot.event
@@ -49,7 +46,6 @@ async def on_member_remove(member):
         await channel.send(text)
 
 
-# คำสั่ง chatbot
 @bot.event
 async def on_message(message):
     if message.author.bot:
@@ -59,12 +55,12 @@ async def on_message(message):
     if mes == 'hello':
         await message.channel.send("Hello It's me")
     elif mes == 'hi bot':
-        await message.channel.send("Hello, " + str(message.author.name))
+        await message.channel.send(f"Hello, {message.author.name}")
 
     await bot.process_commands(message)
 
 
-# ///////////////////// Commands /////////////////////
+# ///////////////////// Prefix Commands /////////////////////
 
 @bot.command()
 async def hello(ctx):
@@ -75,8 +71,6 @@ async def hello(ctx):
 async def test(ctx, arg):
     await ctx.send(arg)
 
-
-# --- คำสั่งเข้า-ออกจากห้องเสียง (Prefix Commands) ---
 
 @bot.command(name='join', help='ให้บอทเข้ามาในห้องเสียงที่คุณอยู่')
 async def join_voice(ctx):
@@ -100,7 +94,7 @@ async def leave_voice(ctx):
         await ctx.send("บอทไม่ได้อยู่ในห้องเสียงครับ!")
 
 
-# --- Slash Commands ---
+# ///////////////////// Slash Commands /////////////////////
 
 @bot.tree.command(name='hellobot', description='Replies with Hello')
 async def hellocommand(interaction: discord.Interaction):
@@ -146,5 +140,5 @@ async def helpcommand(interaction: discord.Interaction):
     await interaction.response.send_message(text)
 
 
-# 3. รันบอท Discord (ต้องอยู่บรรทัดสุดท้าย)
+# ดึง Token จากไฟล์ .env มาใช้งาน
 bot.run(os.getenv('TOKEN'))
